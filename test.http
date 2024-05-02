@@ -1,0 +1,72 @@
+
+# Get all states
+GET http://localhost:3000/states HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+
+### Get all states with contigious
+GET http://localhost:3000/states/?contig=true HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+
+### Get all states with no contigious
+GET http://localhost:3000/states/?contig=false HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+
+### Get  states with statecode
+GET http://localhost:3000/states/AK HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+
+### Get funfact for a state
+GET http://localhost:3000/states/AK/funfact HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+### Get capital for a state
+GET http://localhost:3000/states/AK/capital HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+
+### Get nickname for a state
+GET http://localhost:3000/states/AK/nickname HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+
+### Get population for a state
+GET http://localhost:3000/states/AK/population HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+
+### Get adm for a state
+GET http://localhost:3000/states/AK/admission HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+
