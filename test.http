@@ -1,4 +1,13 @@
 
+# Root
+GET http://loca
+lhost:3000 HTTP/1.1
+content-type: application/json
+
+{
+  
+}
+
 # Get all states
 GET http://localhost:3000/states HTTP/1.1
 content-type: application/json
