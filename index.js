@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
+const cors = require('cors')
+
 
 // Load environment variables
 dotenv.config();
@@ -21,6 +23,7 @@ const statesRoutes = require('./routes/states.js');
 
 // Initialize the app
 const app = express();
+app.use(cors())
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
