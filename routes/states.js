@@ -13,7 +13,7 @@ const contiguousStates = ["AK", "HI"];
 router.get('/', async (req, res) => {
     if (req.query.contig) {
         const contiguous = req.query.contig === 'false' ? false : true;
-        const filteredStates = statesData.filter(state => contiguous === contiguousStates.includes(state.code));
+        const filteredStates = statesData.filter(state => contiguous !== contiguousStates.includes(state.code));
         const stateFunFacts = await States.find({}, 'stateCode funfacts');
         const mergedStates = filteredStates.map(state => {
             const matchingMongoDBState = stateFunFacts.find(s => s.stateCode === state.code);
@@ -66,7 +66,7 @@ router.get('/:state/funfact', async (req, res) => {
         res.json({ funfact: stateFunFacts.funfacts[randomIndex] });
     } else {
         if (state) {
-            return res.status(404).json({ message: 'No fun facts found for ' + state.state });
+            return res.status(404).json({ message: "No Fun Facts found for " + state.state });
         }
         return res.status(404).json({ message: 'Invalid state abbreviation parameter' });
 
@@ -117,7 +117,7 @@ router.get('/:state/admission', async (req, res) => {
     const state = statesData.find(s => s.code === stateCode);
 
     if (state) {
-        res.json({ state: state.state, admitted: state.admission_number });
+        res.json({ state: state.state, admitted: state.admission_date });
     } else {
         res.status(404).json({ message: 'Invalid state abbreviation parameter' });
     }
@@ -127,25 +127,27 @@ router.get('/:state/admission', async (req, res) => {
 router.post('/:state/funfact', async (req, res) => {
     const stateCode = req.params.state.toUpperCase();
     const { funfacts } = req.body;
-
+    
+    if (!funfacts) {
+        res.status(400).json({ message: 'State fun facts value required' });
+        return;
+    }
     if (!Array.isArray(funfacts)) {
         res.status(400).json({ message: 'State fun facts value must be an array' });
         return;
     }
-    if (!funfacts || !funfacts.length) {
-        res.status(400).json({ message: 'State fun facts value required' });
-        return;
-    }
-    const state = await States.findOne({ stateCode });
+    const stateCod = await States.findOne({ stateCode });
+    const state = statesData.find(s => s.code === stateCode);
 
-    if (state) {
-        state.funfacts = state.funfacts.concat(funfacts);
-        await state.save();
-        res.json({ stateCode, funfacts: state.funfacts });
+
+    if (stateCod) {
+        stateCod.funfacts = stateCod.funfacts.concat(funfacts);
+         await stateCod.save();
+        res.status(201).json({state: state.state, message:"success", stateCode, funfacts: stateCod.funfacts });
     } else {
         const newState = new States({ stateCode, funfacts, stateName: statesData.find(s => s.code === stateCode).state });
         await newState.save();
-        res.status(201).json(newState);
+        res.status(201).json({...newState, message:"success", state:state.state});
         // res.status(201).json({ stateCode, funfacts: newState.funfacts });
     }
 });
@@ -157,26 +159,22 @@ router.patch('/:state/funfact', async (req, res) => {
         res.status(400).json({ message: 'State fun fact index value required' });
         return;
     }
-    if (!funfact || typeof funfact !== String) {
+    if (!funfact || typeof funfact !== 'string') {
         res.status(400).json({ message: 'State fun fact value required' });
         return;
     }
-    if (!funfact || index == 0) {
-        res.status(400).json({ error: 'Missing required fields: index and funfact' });
-        return;
-    }
+ 
 
     const stateFunfact = await States.findOne({ stateCode });
     const state = statesData.find(s => s.code === stateCode);
-
 
     if (stateFunfact) {
         if (index > 0 && index <= stateFunfact.funfacts.length) {
             stateFunfact.funfacts[index - 1] = funfact;
             await stateFunfact.save();
-            res.json({ stateCode, funfacts: stateFunfact.funfacts });
+            res.json({ state: state.state, message:"success", stateCode, funfacts: stateFunfact.funfacts });
         } else {
-            res.status(400).json({ message: 'No Fun Fact found at that index for Kansas' });
+            res.status(400).json({ message: 'No Fun Fact found at that index for ' + state.state });
         }
     } else {
         if (state) {
@@ -205,7 +203,7 @@ router.delete('/:state/funfact', async (req, res) => {
         if (index > 0 && index <= stateFunfact.funfacts.length) {
             stateFunfact.funfacts.splice(index - 1, 1);
             await stateFunfact.save();
-            res.json({ stateCode, funfacts: stateFunfact.funfacts });
+            res.status(202).json({ state:state.state, message:"success",stateCode, funfacts: stateFunfact.funfacts });
         } else {
             res.status(404).json({ message: 'No Fun Fact found at that index for '+ state.state });
         }
